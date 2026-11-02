@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ПАДОНКИ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Golos+Text:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: тёмный экран с золотой заставкой; под ней три вертикальных «досье» с силуэтами, которые раскрываются в лица. */
+:root {
+  --bg: #262626;
+  --bg-deep: #191919;
+  --ink: #ece4cf;
+  --ink-dim: #a39b86;
+  --gold: #d8b45c;
+  --gold-hi: #f6e3a1;
+  --gold-lo: #7d6428;
+  --line: rgba(216, 180, 92, 0.28);
+  --f-display: "Oswald", "Arial Narrow", Impact, sans-serif;
+  --f-body: "Golos Text", "PT Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0;
+  background:
+    radial-gradient(120% 70% at 50% 0%, #323232 0%, var(--bg) 55%, var(--bg-deep) 100%);
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body.lock { overflow: hidden; height: 100vh; }
+
+/* ---------- заставка ---------- */
+.intro {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--bg);
+  display: grid; place-items: center;
+  transition: opacity .9s ease, visibility .9s;
+}
+.intro.out { opacity: 0; visibility: hidden; }
+.stage {
+  position: relative;
+  width: var(--S, 520px); height: var(--S, 520px);
+  filter: drop-shadow(0 0 14px rgba(216, 180, 92, .22));
+}
+.stage canvas, .stage .final, .stage .shine {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.stage .final { opacity: 0; transition: opacity .8s ease; object-fit: contain; }
+.stage.solid .final { opacity: 1; }
+.stage .shine {
+  opacity: 0;
+  -webkit-mask: url("img/logo.png") center / contain no-repeat;
+  mask: url("img/logo.png") center / contain no-repeat;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 250, 220, .95) 50%, transparent 62%) no-repeat;
+  background-size: 260% 100%;
+  background-position: 130% 0;
+}
+.stage.shining .shine { opacity: 1; animation: sweep 1.5s ease-in-out forwards; }
+@keyframes sweep { to { background-position: -30% 0; } }
+.skip {
+  position: absolute; left: 0; right: 0; bottom: max(22px, env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  font: 400 12px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-dim); background: none; border: 0; padding: 14px; cursor: pointer;
+}
+.skip:hover, .skip:focus-visible { color: var(--gold); }
+
+/* ---------- шапка ---------- */
+.top {
+  max-width: 1120px; margin: 0 auto;
+  padding-block: 22px 0;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.mark {
+  font: 700 18px/1 var(--f-display); letter-spacing: .32em; color: var(--gold);
+}
+.replay {
+  font: 400 12px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-dim); background: none; border: 1px solid var(--line);
+  padding: 10px 14px; cursor: pointer; border-radius: 2px;
+}
+.replay:hover, .replay:focus-visible { color: var(--gold); border-color: var(--gold); }
+
+/* ---------- выбор ---------- */
+main { max-width: 1120px; margin: 0 auto; padding-block: 56px 72px; }
+.lead { text-align: center; margin-bottom: 56px; }
+.lead h1 {
+  margin: 0;
+  font: 700 clamp(44px, 9vw, 96px)/1 var(--f-display);
+  letter-spacing: .12em; text-transform: uppercase; text-wrap: balance;
+  background: linear-gradient(180deg, var(--gold-hi) 0%, var(--gold) 45%, var(--gold-lo) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lead p {
+  margin: 18px auto 0; max-width: 46ch;
+  font: 400 13px/1.7 var(--f-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-dim); text-wrap: balance;
+}
+.crew {
+  display: grid; gap: 48px 32px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  align-items: start;
+}
+.cell { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+
+.bust {
+  position: relative; aspect-ratio: 4 / 5; width: 100%; max-width: 340px; margin: 0 auto;
+  cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 0 1px rgba(216, 180, 92, .95)) drop-shadow(0 18px 28px rgba(0, 0, 0, .45));
+  transition: filter .5s ease;
+}
+.bust:hover, .bust.on, .bust:focus-visible {
+  filter: drop-shadow(0 0 1px var(--gold)) drop-shadow(0 0 22px rgba(216, 180, 92, .35)) drop-shadow(0 18px 28px rgba(0, 0, 0, .45));
+}
+.bust:focus-visible { outline: 2px solid var(--gold); outline-offset: 8px; }
+.sil, .photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  -webkit-mask: var(--bustmask) center / 100% 100% no-repeat;
+  mask: var(--bustmask) center / 100% 100% no-repeat;
+}
+.sil { background: linear-gradient(180deg, #1d1d1d 0%, #0c0c0c 100%); }
+.photo {
+  object-fit: cover; display: block;
+  clip-path: circle(0% at 50% 37%);
+  transform: scale(1.06);
+  filter: grayscale(.7) contrast(1.08);
+  transition: clip-path .9s cubic-bezier(.2, .7, .2, 1), transform 1.2s ease, filter 1s ease;
+}
+.bust:hover .photo, .bust.on .photo, .bust:focus-visible .photo {
+  clip-path: circle(80% at 50% 37%);
+  transform: scale(1);
+  filter: grayscale(0) contrast(1.02);
+}
+.qm {
+  position: absolute; left: 0; right: 0; top: 24%;
+  text-align: center; pointer-events: none;
+  font: 700 clamp(56px, 9vw, 84px)/1 var(--f-display); color: var(--gold-lo);
+  transition: opacity .35s ease;
+}
+.bust:hover .qm, .bust.on .qm, .bust:focus-visible .qm { opacity: 0; }
+
+.case { font: 400 12px/1.4 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-lo); }
+.name {
+  margin: 0;
+  font: 700 clamp(34px, 5vw, 46px)/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-dim); transition: color .4s ease;
+}
+.cell:hover .name, .cell:focus-within .name, .cell.on .name { color: var(--gold); }
+.story { margin: 0; color: var(--ink); max-width: 46ch; }
+.story + .story { margin-top: -6px; }
+.verdict {
+  margin: 0; padding-top: 14px; border-top: 1px solid var(--line);
+  font: 400 12px/1.6 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim);
+}
+.verdict b { color: var(--gold); font-weight: 500; }
+
+footer {
+  max-width: 1120px; margin: 0 auto; padding-block: 28px 40px;
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px;
+  font: 400 12px/1.6 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim);
+}
+footer span:first-child { color: var(--gold); }
+
+@media (prefers-reduced-motion: reduce) {
+  .photo, .stage .final, .intro { transition: none; }
+  .stage.shining .shine { animation: none; opacity: 0; }
+}
+</style>
+
+</head>
+<body>
+<div class="intro" id="intro" role="presentation">
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-hidden="true"></canvas>
+    <img class="final" id="final" src="img/logo.png" alt="Падонки. It's never too late.">
+    <div class="shine" aria-hidden="true"></div>
+  </div>
+  <button class="skip" id="skip" type="button">нажми, чтобы пропустить</button>
+</div>
+
+<header class="top">
+  <div class="mark">ПАДОНКИ</div>
+  <button class="replay" id="replay" type="button">заставка ↻</button>
+</header>
+
+<main>
+  <div class="lead">
+    <h1>Падонки</h1>
+    <p>Выбери своего. Наведи курсор на силуэт или коснись его, и увидишь лицо.</p>
+  </div>
+
+  <section class="crew" aria-label="Банда">
+    <article class="cell">
+      <div class="bust" tabindex="0" role="button" aria-label="Показать лицо: Бугор">
+        <div class="sil"></div><span class="qm">?</span>
+        <img class="photo" src="img/p1.jpg" alt="Бугор">
+      </div>
+      <div class="case">Дело о шаурме</div>
+      <h2 class="name">Бугор</h2>
+      <p class="story">Три двора держал в страхе. Пришёл к ларьку с шаурмой и потребовал долю. Продавец спокойно выдал долю: ровно треть шаурмы. Бугор остался доволен и теперь платит этот «налог» сам, каждую пятницу, с двойным соусом.</p>
+      <p class="story">Авторитет закончился одним вечером, когда бабушка с четвёртого этажа крикнула на весь двор: «Бугор, домой, борщ стынет!» Он пошёл. Борщ был хороший.</p>
+      <p class="verdict"><b>Приговор:</b> добавка и компот</p>
+    </article>
+
+    <article class="cell">
+      <div class="bust" tabindex="0" role="button" aria-label="Показать лицо: Тихий">
+        <div class="sil"></div><span class="qm">?</span>
+        <img class="photo" src="img/p2.jpg" alt="Тихий">
+      </div>
+      <div class="case">Дело об электросамокате</div>
+      <h2 class="name">Тихий</h2>
+      <p class="story">Говорит раз в три дня, зато так, что все замолкают. Легенда гласит, что он молча посмотрел на охранника в магазине, и тот сам предложил скидку. Позже выяснилось, что Тихий забыл очки и просто искал ценник.</p>
+      <p class="story">Самое громкое дело: угнал чужой самокат. Через сорок минут батарея села. Ещё час Тихий нёс самокат на плече и всё это время думал, как вернуть его по-тихому. Вернул. Хозяин даже не заметил, что самокат был в розыске.</p>
+      <p class="verdict"><b>Приговор:</b> условно, с обязательным зарядным устройством</p>
+    </article>
+
+    <article class="cell">
+      <div class="bust" tabindex="0" role="button" aria-label="Показать лицо: Малой">
+        <div class="sil"></div><span class="qm">?</span>
+        <img class="photo" src="img/p3.jpg" alt="Малой">
+      </div>
+      <div class="case">Дело о гусе</div>
+      <h2 class="name">Малой</h2>
+      <p class="story">По собственной версии, самый опасный на районе. В боевой стойке (см. фото) вышел против дворового гуся. Гусь не впечатлился и пошёл прямо на него. Малой совершил тактическое отступление на три квартала, громко объясняя, что это была разведка.</p>
+      <p class="story">Гусь до сих пор держит территорию. Малой обходит её по параллельной улице и называет это «дипломатией».</p>
+      <p class="verdict"><b>Приговор:</b> пожизненный запрет на гусей</p>
+    </article>
+  </section>
+</main>
+
+<footer>
+  <span>It's never too late</span>
+  <span>Все прозвища и истории выдуманы для смеха. Совпадения случайны.</span>
+</footer>
+
+<script>
+(function () {
+  /* силуэт: голова, шея и плечи; общая маска для тёмной заливки и фото */
+  var maskSvg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 125' preserveAspectRatio='none'>" +
+    "<ellipse cx='50' cy='45' rx='26' ry='36'/>" +
+    "<rect x='40' y='74' width='20' height='20'/>" +
+    "<path d='M0 125 L0 112 C0 100 14 94 32 89 L41 86 L59 86 L68 89 C86 94 100 100 100 112 L100 125 Z'/>" +
+    "</svg>";
+  document.documentElement.style.setProperty("--bustmask", 'url("data:image/svg+xml,' + encodeURIComponent(maskSvg) + '")');
+
+  /* раскрытие по касанию и с клавиатуры (на мыши работает :hover) */
+  document.querySelectorAll(".bust").forEach(function (b) {
+    function toggle() { b.classList.toggle("on"); b.closest(".cell").classList.toggle("on", b.classList.contains("on")); }
+    b.addEventListener("click", toggle);
+    b.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+  });
+
+  /* заставка */
+  var intro = document.getElementById("intro"), stage = document.getElementById("stage"),
+      cv = document.getElementById("cv"), ctx = cv.getContext("2d"),
+      skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay");
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var raf = 0, timers = [], running = false, logo = null;
+
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf); }
+  function finish() {
+    if (!running) return;
+    running = false; clearTimers();
+    intro.classList.add("out"); document.body.classList.remove("lock");
+    timers.push(setTimeout(function () { intro.hidden = true; }, 950));
+  }
+  skipBtn.addEventListener("click", finish);
+  intro.addEventListener("click", finish);
+
+  function ease(t) { return 1 - Math.pow(1 - t, 3); }
+
+  function play() {
+    clearTimers();
+    running = true;
+    intro.hidden = false; intro.classList.remove("out");
+    document.body.classList.add("lock");
+    stage.classList.remove("solid", "shining");
+
+    var S = Math.floor(Math.min(window.innerWidth * 0.88, window.innerHeight * 0.74, 640));
+    stage.style.setProperty("--S", S + "px");
+    if (reduce) {
+      stage.classList.add("solid");
+      timers.push(setTimeout(finish, 1400));
+      return;
+    }
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), W = Math.round(S * dpr);
+    cv.width = W; cv.height = W; ctx.clearRect(0, 0, W, W);
+
+    var off = document.createElement("canvas"); off.width = W; off.height = W;
+    var octx = off.getContext("2d"); octx.drawImage(logo, 0, 0, W, W);
+    var data = octx.getImageData(0, 0, W, W).data;
+
+    var step = Math.max(2, Math.round(2 * dpr)), pts = [];
+    for (var attempt = 0; attempt < 4; attempt++) {
+      pts = [];
+      for (var y = 0; y < W; y += step) for (var x = 0; x < W; x += step) {
+        var i = (y * W + x) * 4;
+        if (data[i + 3] > 90) pts.push({ tx: x, ty: y, c: "rgb(" + data[i] + "," + data[i + 1] + "," + data[i + 2] + ")" });
+      }
+      if (pts.length <= 15000) break;
+      step += 1;
+    }
+    var cx = W / 2, cy = W / 2;
+    pts.forEach(function (p) {
+      var a = Math.random() * Math.PI * 2, r = W * (0.55 + Math.random() * 0.7);
+      p.sx = cx + Math.cos(a) * r; p.sy = cy + Math.sin(a) * r * 0.9;
+      p.d = (p.ty / W) * 900 + Math.random() * 600;
+      p.dur = 1300 + Math.random() * 900;
+      p.sw = (Math.random() - 0.5) * W * 0.18;
+    });
+    var size = Math.max(1.5, step * 0.95), t0 = performance.now(), solidAt = 3000, shone = false;
+
+    function frame(now) {
+      if (!running) return;
+      var el = now - t0;
+      ctx.clearRect(0, 0, W, W);
+      var fade = el > solidAt ? Math.max(0, 1 - (el - solidAt) / 700) : 1;
+      if (fade > 0) {
+        for (var k = 0; k < pts.length; k++) {
+          var p = pts[k], t = (el - p.d) / p.dur;
+          if (t <= 0) continue;
+          if (t > 1) t = 1;
+          var e = ease(t), inv = 1 - e, bend = Math.sin(Math.PI * e) * p.sw;
+          ctx.globalAlpha = (0.2 + 0.8 * e) * fade;
+          ctx.fillStyle = p.c;
+          ctx.fillRect(p.tx + (p.sx - p.tx) * inv + bend, p.ty + (p.sy - p.ty) * inv - bend * 0.4, size, size);
+        }
+        ctx.globalAlpha = 1;
+      }
+      if (el > solidAt && !stage.classList.contains("solid")) stage.classList.add("solid");
+      if (el > solidAt + 500 && !shone) { shone = true; stage.classList.add("shining"); timers.push(setTimeout(finish, 2100)); }
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+  }
+
+  replayBtn.addEventListener("click", function () { window.scrollTo(0, 0); if (logo) play(); });
+
+  logo = new Image();
+  logo.onload = play;
+  logo.onerror = function () { stage.classList.add("solid"); setTimeout(function () { running = true; finish(); }, 1200); };
+  logo.src = "img/logo.png";
+})();
+</script>
+</body>
+</html>
